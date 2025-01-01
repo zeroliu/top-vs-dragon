@@ -73,33 +73,127 @@
         z-index: 1000;
         border: 2px solid rgba(79, 70, 229, 0.5);
         box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+        max-width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
       }
 
-      @media (orientation: portrait) {
+      #instructions h2 {
+        color: #0ea5e9;
+        margin-bottom: 20px;
+      }
+
+      #instructions .control-group {
+        margin: 15px 0;
+        text-align: left;
+      }
+
+      #instructions .key {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-family: monospace;
+        margin: 0 5px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      #instructions .start-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 30px;
+        background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      #instructions .start-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+      }
+
+      #instructions ul {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+      }
+
+      #instructions li {
+        margin: 8px 0;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      #instructions li::before {
+        content: '•';
+        color: #0ea5e9;
+        position: absolute;
+        left: 0;
+      }
+
+      #portrait-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        z-index: 2000;
+        font-size: 24px;
+        box-sizing: border-box;
+      }
+
+      #portrait-message .message-content {
+        max-width: 90%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      #portrait-message img {
+        width: 60px;
+        height: 60px;
+        margin: 20px auto;
+        animation: rotate 2s infinite;
+        display: block;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(90deg);
+        }
+      }
+
+      @media (orientation: portrait) and (max-width: 1024px) {
         #portrait-message {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.9);
           display: flex;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          color: white;
-          z-index: 2000;
-          font-size: 24px;
-          padding: 20px;
+        }
+        #portrait-message .message-content {
+          font-size: 20px;
         }
       }
 
       @media (orientation: landscape) and (max-width: 1024px) {
         #mobileControls {
           display: flex;
-        }
-        #portrait-message {
-          display: none;
         }
       }
     </style>
@@ -118,7 +212,7 @@
       </div>
     </div>
 
-    <div id="instructions">
+    <div id="instructions" onclick="event.stopPropagation()">
       <h2>How to Play</h2>
       <div class="control-group">
         <strong>Movement:</strong>
@@ -143,11 +237,11 @@
     </div>
 
     <div id="portrait-message">
-      <div>
+      <div class="message-content">
         Please rotate your device to landscape mode
         <br />
         <img
-          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2LjQ4IDIuNTJjMy40NyAxLjE0IDYgNC4yNSA2IDcuOTggMCA0LjQyLTMuNTggOC01IDgtMS40MiAwLTIuNi0uODUtNC0yLTEuNCAxLjE1LTIuNTggMi01IDItMS40MiAwLTUtMy41OC01LTggMC0zLjczIDIuNTMtNi44NiA2LTgtMS45OSAyLjM0LTIgNS42Ni0yIDkgMCAyLjIuNzggNC40NSAyLjEgNi4yNiAxLjMzIDEuODEgMy4xMiAyLjc0IDQuOSAyLjc0czMuNTctLjkzIDQuOS0yLjc0QzIxLjIyIDEzLjQ1IDIyIDExLjIgMjIgOWMwLTMuMzQtLjAxLTYuNjYtMi02LjQ4eiIvPjwvc3ZnPg=="
+          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2LjQ4IDIuNTJjMy40NyAxLjE0IDYgNC4yNSA2IDcuOTggMCA0LjQyLTMuNTggOC01IDgtMS40MiAwLTIuNi0uODUtNC0yLTEuNCAxLjE1LTIuNTggMi01IDItMS40MiAwLTUtMy41OC01LTggMC0zLjczIDIuNTMtNi44NiA2LTggMS45OSAyLjM0LTIgNS42Ni0yIDkgMCAyLjIuNzggNC40NSAyLjEgNi4yNiAxLjMzIDEuODEgMy4xMiAyLjc0IDQuOSAyLjc0czMuNTctLjkzIDQuOS0yLjc0QzIxLjIyIDEzLjQ1IDIyIDExLjIgMjIgOWMwLTMuMzQtLjAxLTYuNjYtMi02LjQ4eiIvPjwvc3ZnPg=="
           alt="Rotate device"
         />
       </div>
@@ -158,6 +252,33 @@
 
       const canvas = document.getElementById('gameCanvas');
       const game = new Game(canvas);
+      let isPortrait = false;
+      let gameStarted = false;
+
+      // Check orientation and handle game state
+      function checkOrientation() {
+        isPortrait = window.innerHeight > window.innerWidth;
+        const portraitMessage = document.getElementById('portrait-message');
+        const mobileControls = document.getElementById('mobileControls');
+
+        if (isPortrait && window.innerWidth <= 1024) {
+          // Pause game in portrait mode
+          if (game.state === 'playing') {
+            game.state = 'paused';
+          }
+          portraitMessage.style.display = 'flex';
+          mobileControls.style.display = 'none';
+        } else {
+          // Resume game in landscape mode
+          if (game.state === 'paused') {
+            game.state = 'playing';
+          }
+          portraitMessage.style.display = 'none';
+          if (window.innerWidth <= 1024) {
+            mobileControls.style.display = 'flex';
+          }
+        }
+      }
 
       // Mobile controls
       const upButton = document.getElementById('upButton');
@@ -167,25 +288,25 @@
 
       // Touch event handlers
       upButton.addEventListener('touchstart', () => {
-        if (game.spinner) game.spinner.velocity = -400;
+        if (game.spinner && !isPortrait) game.spinner.velocity = -400;
       });
       upButton.addEventListener('touchend', () => {
-        if (game.spinner) game.spinner.velocity = 0;
+        if (game.spinner && !isPortrait) game.spinner.velocity = 0;
       });
 
       downButton.addEventListener('touchstart', () => {
-        if (game.spinner) game.spinner.velocity = 400;
+        if (game.spinner && !isPortrait) game.spinner.velocity = 400;
       });
       downButton.addEventListener('touchend', () => {
-        if (game.spinner) game.spinner.velocity = 0;
+        if (game.spinner && !isPortrait) game.spinner.velocity = 0;
       });
 
       shootButton.addEventListener('touchstart', () => {
-        if (game.spinner) game.spinner.shoot();
+        if (game.spinner && !isPortrait) game.spinner.shoot();
       });
 
       reloadButton.addEventListener('touchstart', () => {
-        if (game.spinner) game.spinner.reload();
+        if (game.spinner && !isPortrait) game.spinner.reload();
       });
 
       // Prevent default touch behavior
@@ -208,15 +329,33 @@
 
         canvas.width = 800;
         canvas.height = 450;
+
+        checkOrientation();
       }
 
       window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('orientationchange', checkOrientation);
       resizeCanvas();
+
+      // Prevent any clicks from starting the game except the start button
+      document.addEventListener(
+        'click',
+        (e) => {
+          if (!gameStarted && !e.target.closest('#instructions')) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        },
+        true,
+      );
 
       // Start game function
       window.startGame = function () {
+        gameStarted = true;
         document.getElementById('instructions').style.display = 'none';
-        game.start();
+        if (!isPortrait || window.innerWidth > 1024) {
+          game.start();
+        }
       };
     </script>
   </body>
