@@ -831,62 +831,43 @@ function drawTextWithBox(text, x, y, fontSize, padding = 10) {
 
 // Draw title screen
 function drawTitleScreen() {
-  // Draw background image
-  if (titleBackground.complete) {
-    ctx.drawImage(titleBackground, 0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.fillStyle = '#333';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  gradient.addColorStop(0, '#4f46e5');
+  gradient.addColorStop(1, '#0ea5e9');
 
-  // Title with larger shadow for better visibility
-  drawTextWithShadow(
-    'Top vs Dragons',
+  ctx.fillStyle = gradient;
+  ctx.font = 'bold 64px Poppins, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Add multiple shadows for a stronger effect
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 4;
+
+  // Draw main title
+  ctx.fillText('Top vs Dragon', canvas.width / 2, canvas.height / 2 - 40);
+
+  // Reset shadow for subtitle
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  // Draw subtitle
+  ctx.font = '24px Poppins, Arial, sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.fillText(
+    'Click anywhere to start',
     canvas.width / 2,
-    canvas.height / 3,
-    64, // Larger font
-    '#fff',
-    'center',
-    4, // Larger shadow offset
+    canvas.height / 2 + 40,
   );
 
-  // Instructions and controls with enhanced visibility
-  drawTextWithShadow(
-    'Press SPACE to Start',
-    canvas.width / 2,
-    canvas.height / 2,
-    32,
-    '#fff',
-  );
-
-  drawTextWithShadow(
-    'Controls:',
-    canvas.width / 2,
-    canvas.height * 0.65,
-    24,
-    '#fff',
-  );
-  drawTextWithShadow(
-    '↑↓ - Move Up/Down',
-    canvas.width / 2,
-    canvas.height * 0.7,
-    24,
-    '#fff',
-  );
-  drawTextWithShadow(
-    'SPACE - Shoot',
-    canvas.width / 2,
-    canvas.height * 0.75,
-    24,
-    '#fff',
-  );
-  drawTextWithShadow(
-    'R - Reload',
-    canvas.width / 2,
-    canvas.height * 0.8,
-    24,
-    '#fff',
-  );
+  // Reset shadow effects
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
 }
 
 // Update input handling

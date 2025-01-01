@@ -30,6 +30,7 @@ export class Game {
       maxDuration: 200, // 200ms shake duration
       maxIntensity: 15, // maximum pixels to shake
     };
+    this.blinkTime = 0; // Add blink timer
     this.setupEventListeners();
   }
 
@@ -104,6 +105,9 @@ export class Game {
   update(deltaTime) {
     // Cap deltaTime to prevent large jumps
     const cappedDeltaTime = Math.min(deltaTime, 50);
+
+    // Update blink timer
+    this.blinkTime += cappedDeltaTime;
 
     switch (this.state) {
       case GAME_STATE.PLAYING:
@@ -260,29 +264,60 @@ export class Game {
       this.canvas.height,
     );
 
-    // Draw title
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '48px Arial';
+    // Set up shadow effect for all text
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    this.ctx.shadowBlur = 20;
+    this.ctx.shadowOffsetX = 4;
+    this.ctx.shadowOffsetY = 4;
+
+    // Draw main title with gradient
+    const gradient = this.ctx.createLinearGradient(
+      0,
+      this.canvas.height / 3 - 30,
+      0,
+      this.canvas.height / 3 + 30,
+    );
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(1, '#e0e7ff');
+
+    this.ctx.fillStyle = gradient;
+    this.ctx.font = 'bold 64px Poppins, Arial, sans-serif';
     this.ctx.textAlign = 'center';
     this.ctx.fillText(
-      'Dragon Spinner',
+      'Top vs Dragon',
       this.canvas.width / 2,
       this.canvas.height / 3,
     );
 
-    // Draw instructions
-    this.ctx.font = '24px Arial';
+    // Adjust shadow for subtitle
+    this.ctx.shadowBlur = 10;
+    this.ctx.shadowOffsetX = 2;
+    this.ctx.shadowOffsetY = 2;
+
+    // Draw instructions with blinking effect
+    const blinkAlpha = Math.abs(Math.sin(this.blinkTime / 500)); // Create pulsing alpha value
+    this.ctx.fillStyle = `rgba(255, 255, 255, ${blinkAlpha})`;
+    this.ctx.font = '28px Poppins, Arial, sans-serif';
     this.ctx.fillText(
       'Click to Start',
       this.canvas.width / 2,
       (this.canvas.height * 2) / 3,
     );
-    this.ctx.font = '18px Arial';
+
+    // Draw high score
+    this.ctx.fillStyle = '#fff';
+    this.ctx.font = '24px Poppins, Arial, sans-serif';
     this.ctx.fillText(
       `High Score: ${this.highScore}`,
       this.canvas.width / 2,
       (this.canvas.height * 3) / 4,
     );
+
+    // Reset shadow effects
+    this.ctx.shadowColor = 'transparent';
+    this.ctx.shadowBlur = 0;
+    this.ctx.shadowOffsetX = 0;
+    this.ctx.shadowOffsetY = 0;
   }
 
   drawGame() {
