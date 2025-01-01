@@ -382,14 +382,8 @@ export class Game {
   gameLoop(currentTime) {
     if (this.lastTime) {
       const deltaTime = currentTime - this.lastTime;
-      this.accumulator += deltaTime;
-
-      while (this.accumulator >= this.timeStep) {
-        this.update(this.timeStep);
-        this.accumulator -= this.timeStep;
-      }
+      this.update(deltaTime);
     }
-
     this.lastTime = currentTime;
     this.draw();
     requestAnimationFrame(this.gameLoop.bind(this));
@@ -397,6 +391,7 @@ export class Game {
 
   start() {
     titleMusic.play();
+    this.lastTime = performance.now();
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 }

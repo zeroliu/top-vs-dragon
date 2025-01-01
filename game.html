@@ -3,62 +3,221 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dragon Spinner</title>
+    <title>Top vs Dragons - Game</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      html,
       body {
-        width: 100%;
-        height: 100%;
+        margin: 0;
         overflow: hidden;
-        background: #000;
-        position: relative;
+        background: #0f172a;
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
       }
 
       #gameCanvas {
         display: block;
-        touch-action: none;
-        background: #1e293b;
+        max-width: 100vw;
+        max-height: 100vh;
+        object-fit: contain;
       }
 
-      #orientation-message {
-        display: none;
+      #mobileControls {
         position: fixed;
-        top: 0;
+        bottom: 20px;
         left: 0;
         right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.9);
-        color: white;
-        font-family: Arial, sans-serif;
-        font-size: 24px;
-        text-align: center;
-        padding-top: 40vh;
-        z-index: 9999;
+        display: none;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 1000;
       }
 
-      @media (orientation: portrait) and (max-width: 768px) {
-        #orientation-message {
-          display: block;
+      .control-group {
+        display: flex;
+        gap: 20px;
+      }
+
+      .control-button {
+        width: 60px;
+        height: 60px;
+        background: rgba(79, 70, 229, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        color: white;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      .control-button:active {
+        background: rgba(79, 70, 229, 0.5);
+        transform: scale(0.95);
+      }
+
+      #instructions {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.85);
+        padding: 30px;
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        z-index: 1000;
+        border: 2px solid rgba(79, 70, 229, 0.5);
+        box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+      }
+
+      @media (orientation: portrait) {
+        #portrait-message {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.9);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          color: white;
+          z-index: 2000;
+          font-size: 24px;
+          padding: 20px;
+        }
+      }
+
+      @media (orientation: landscape) and (max-width: 1024px) {
+        #mobileControls {
+          display: flex;
+        }
+        #portrait-message {
+          display: none;
         }
       }
     </style>
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
-    <div id="orientation-message">
-      Please rotate your device to landscape mode to play the game.
+
+    <div id="mobileControls">
+      <div class="control-group">
+        <button class="control-button" id="upButton">↑</button>
+        <button class="control-button" id="downButton">↓</button>
+      </div>
+      <div class="control-group">
+        <button class="control-button" id="shootButton">•</button>
+        <button class="control-button" id="reloadButton">R</button>
+      </div>
     </div>
+
+    <div id="instructions">
+      <h2>How to Play</h2>
+      <div class="control-group">
+        <strong>Movement:</strong>
+        <div>
+          <span class="key">↑</span> <span class="key">↓</span> Move Up/Down
+        </div>
+      </div>
+      <div class="control-group">
+        <strong>Combat:</strong>
+        <div><span class="key">Space</span> Shoot Spikes</div>
+        <div><span class="key">R</span> Reload Ammo</div>
+      </div>
+      <div class="control-group">
+        <strong>Tips:</strong>
+        <ul>
+          <li>Watch your ammo count</li>
+          <li>Dodge dragon fireballs</li>
+          <li>Reload when it's safe</li>
+        </ul>
+      </div>
+      <button class="start-button" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="portrait-message">
+      <div>
+        Please rotate your device to landscape mode
+        <br />
+        <img
+          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2LjQ4IDIuNTJjMy40NyAxLjE0IDYgNC4yNSA2IDcuOTggMCA0LjQyLTMuNTggOC01IDgtMS40MiAwLTIuNi0uODUtNC0yLTEuNCAxLjE1LTIuNTggMi01IDItMS40MiAwLTUtMy41OC01LTggMC0zLjczIDIuNTMtNi44NiA2LTgtMS45OSAyLjM0LTIgNS42Ni0yIDkgMCAyLjIuNzggNC40NSAyLjEgNi4yNiAxLjMzIDEuODEgMy4xMiAyLjc0IDQuOSAyLjc0czMuNTctLjkzIDQuOS0yLjc0QzIxLjIyIDEzLjQ1IDIyIDExLjIgMjIgOWMwLTMuMzQtLjAxLTYuNjYtMi02LjQ4eiIvPjwvc3ZnPg=="
+          alt="Rotate device"
+        />
+      </div>
+    </div>
+
     <script type="module">
-      import { initGame } from './js/game/core/index.js';
+      import { Game } from './js/game/core/game.js';
 
       const canvas = document.getElementById('gameCanvas');
-      const game = initGame(canvas);
+      const game = new Game(canvas);
+
+      // Mobile controls
+      const upButton = document.getElementById('upButton');
+      const downButton = document.getElementById('downButton');
+      const shootButton = document.getElementById('shootButton');
+      const reloadButton = document.getElementById('reloadButton');
+
+      // Touch event handlers
+      upButton.addEventListener('touchstart', () => {
+        if (game.spinner) game.spinner.velocity = -400;
+      });
+      upButton.addEventListener('touchend', () => {
+        if (game.spinner) game.spinner.velocity = 0;
+      });
+
+      downButton.addEventListener('touchstart', () => {
+        if (game.spinner) game.spinner.velocity = 400;
+      });
+      downButton.addEventListener('touchend', () => {
+        if (game.spinner) game.spinner.velocity = 0;
+      });
+
+      shootButton.addEventListener('touchstart', () => {
+        if (game.spinner) game.spinner.shoot();
+      });
+
+      reloadButton.addEventListener('touchstart', () => {
+        if (game.spinner) game.spinner.reload();
+      });
+
+      // Prevent default touch behavior
+      document.addEventListener('touchmove', (e) => e.preventDefault(), {
+        passive: false,
+      });
+
+      // Resize canvas to maintain aspect ratio
+      function resizeCanvas() {
+        const aspectRatio = 16 / 9;
+        const windowRatio = window.innerWidth / window.innerHeight;
+
+        if (windowRatio > aspectRatio) {
+          canvas.style.width = window.innerHeight * aspectRatio + 'px';
+          canvas.style.height = '100vh';
+        } else {
+          canvas.style.width = '100vw';
+          canvas.style.height = window.innerWidth / aspectRatio + 'px';
+        }
+
+        canvas.width = 800;
+        canvas.height = 450;
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // Start game function
+      window.startGame = function () {
+        document.getElementById('instructions').style.display = 'none';
+        game.start();
+      };
     </script>
   </body>
 </html>

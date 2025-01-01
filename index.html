@@ -327,6 +327,47 @@
           transform: rotate(360deg);
         }
       }
+
+      .instructions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      .instruction-item {
+        background: rgba(79, 70, 229, 0.1);
+        padding: 25px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .instruction-item:hover {
+        transform: translateY(-5px);
+        background: rgba(79, 70, 229, 0.15);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .instruction-item h3 {
+        color: var(--secondary);
+        font-size: 22px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .key {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin: 0 2px;
+      }
     </style>
   </head>
   <body>
@@ -411,6 +452,86 @@
           </div>
         </div>
       </section>
+
+      <section>
+        <h2>How to Play</h2>
+        <div class="instructions">
+          <div class="instruction-item">
+            <h3>🎮 Controls</h3>
+            <ul>
+              <li>
+                Use <span class="key">↑</span> <span class="key">↓</span> arrow
+                keys to move up and down
+              </li>
+              <li>Press <span class="key">Space</span> to shoot spikes</li>
+              <li>
+                Press <span class="key">R</span> to reload when out of ammo
+              </li>
+            </ul>
+          </div>
+          <div class="instruction-item">
+            <h3>🎯 Objective</h3>
+            <ul>
+              <li>Defeat the dragons by hitting them with your spikes</li>
+              <li>Avoid dragon fireballs to stay alive</li>
+              <li>Complete levels to face stronger dragons</li>
+              <li>Try to achieve the highest score!</li>
+            </ul>
+          </div>
+          <div class="instruction-item">
+            <h3>💡 Tips</h3>
+            <ul>
+              <li>Watch your ammo count and reload when safe</li>
+              <li>Dragons get tougher in higher levels</li>
+              <li>Time your shots carefully to conserve ammo</li>
+              <li>Stay mobile to dodge incoming fireballs</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <style>
+        .instructions {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 30px;
+          margin-top: 20px;
+        }
+
+        .instruction-item {
+          background: rgba(79, 70, 229, 0.1);
+          padding: 25px;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        .instruction-item:hover {
+          transform: translateY(-5px);
+          background: rgba(79, 70, 229, 0.15);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .instruction-item h3 {
+          color: var(--secondary);
+          font-size: 22px;
+          margin-bottom: 15px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .key {
+          display: inline-block;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 2px 8px;
+          border-radius: 6px;
+          font-family: monospace;
+          font-size: 14px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          margin: 0 2px;
+        }
+      </style>
     </div>
   </body>
 </html>
