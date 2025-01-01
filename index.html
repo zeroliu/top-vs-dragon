@@ -238,6 +238,95 @@
           grid-template-columns: 1fr;
         }
       }
+
+      .play-section {
+        text-align: center;
+        padding: 20px 0;
+        margin: 20px 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .play-section:hover {
+        transform: none;
+      }
+
+      .play-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 40px;
+        font-size: 28px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 50px;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        transform: translateY(0);
+      }
+
+      .play-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+      }
+
+      .play-text {
+        position: relative;
+        z-index: 1;
+        margin-right: 15px;
+      }
+
+      .play-icon {
+        font-size: 24px;
+        position: relative;
+        z-index: 1;
+        animation: pulse 2s infinite;
+      }
+
+      .glow {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.8) 0%,
+          rgba(255, 255, 255, 0) 70%
+        );
+        top: -50%;
+        left: -50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .play-button:hover .glow {
+        opacity: 0.1;
+        animation: rotate 3s linear infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
@@ -249,6 +338,14 @@
         </div>
       </div>
     </header>
+
+    <section class="play-section">
+      <a href="game.html" class="play-button">
+        <span class="play-text">Play the Game</span>
+        <span class="play-icon">▶</span>
+        <div class="glow"></div>
+      </a>
+    </section>
 
     <div class="container">
       <section>
@@ -272,7 +369,7 @@
         <h2>The Original Sketch</h2>
         <div class="sketch-container">
           <img
-            src="sketch.jpg"
+            src="assets/images/sketch.jpg"
             alt="Original game sketch by 8-year-old creator"
           />
           <p>
@@ -314,19 +411,6 @@
           </div>
         </div>
       </section>
-
-      <section>
-        <h2>Play the Game</h2>
-        <div class="game-container">
-          <canvas id="gameCanvas" width="800" height="400"></canvas>
-        </div>
-        <p>
-          Use the arrow keys to move up and down, SPACE to shoot spikes, and R
-          to reload. Can you defeat all the dragons and reach the highest level?
-        </p>
-      </section>
     </div>
-
-    <script src="game.js"></script>
   </body>
 </html>

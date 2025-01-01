@@ -29,6 +29,21 @@ const HEALTH_INCREASE_PER_LEVEL = 50;
 const DRAGONS_PER_LEVEL = 2;
 const MAX_DRAGONS = 4;
 
+// Expose game constants to window
+window.PLAYER_SPEED = PLAYER_SPEED;
+
+// Game state
+window.gameStarted = false;
+window.gameOver = false;
+window.spinner = null;
+let dragons = [new Dragon(1)];
+let currentLevel = 1;
+let transitioning = false;
+let transitionTimer = 0;
+let explosions = [];
+let dragonHitEffects = [];
+let screenShake = 0;
+
 // Game classes
 class Character {
   constructor(x, y, width, height, color) {
@@ -730,33 +745,46 @@ class DragonHitEffect {
   }
 }
 
-// Game state
-const spinner = new Spinner();
-let dragons = [new Dragon(1)];
-let gameOver = false;
-let currentLevel = 1;
-let transitioning = false;
-let transitionTimer = 0;
-const TRANSITION_TIME = 120;
-let gameStarted = false;
-let explosions = [];
-let dragonHitEffects = [];
-let screenShake = 0;
-
-// Function to start the game
+// Game initialization and control
 function startGame() {
-  gameStarted = true;
+  if (window.gameStarted) return;
+  window.gameStarted = true;
+  window.gameOver = false;
+  window.spinner = new Spinner();
+  dragons = [new Dragon(1)];
+  currentLevel = 1;
+  transitioning = false;
+  transitionTimer = 0;
+  explosions = [];
+  dragonHitEffects = [];
+  screenShake = 0;
   titleMusic.pause();
   titleMusic.currentTime = 0;
   backgroundMusic.play().catch((e) => console.log('Audio play failed:', e));
 }
 
-// Function to end the game
 function endGame() {
-  gameOver = true;
+  window.gameOver = true;
   backgroundMusic.pause();
   backgroundMusic.currentTime = 0;
 }
+
+function resetGame() {
+  window.gameStarted = false;
+  window.gameOver = false;
+  window.spinner = null;
+  dragons = [new Dragon(1)];
+  currentLevel = 1;
+  transitioning = false;
+  transitionTimer = 0;
+  explosions = [];
+  dragonHitEffects = [];
+  screenShake = 0;
+}
+
+// Expose game functions to window
+window.startGame = startGame;
+window.resetGame = resetGame;
 
 // Helper function to draw text with shadow
 function drawTextWithShadow(
@@ -861,27 +889,11 @@ function drawTitleScreen() {
   );
 }
 
-// Function to reset game state
-function resetGame() {
-  spinner.health = MAX_HEALTH;
-  spinner.ammo = MAX_AMMO;
-  spinner.isReloading = false;
-  spinner.spikes = [];
-  dragons = [new Dragon(1)];
-  gameOver = false;
-  currentLevel = 1;
-  transitioning = false;
-  transitionTimer = 0;
-  explosions = [];
-  dragonHitEffects = [];
-  screenShake = 0;
-}
-
 // Update input handling
 document.addEventListener('keydown', (e) => {
-  if (!gameStarted) {
+  if (!window.gameStarted) {
     if (e.key === ' ') {
-      if (gameOver) {
+      if (window.gameOver) {
         resetGame();
       }
       startGame();
@@ -896,11 +908,11 @@ document.addEventListener('keydown', (e) => {
         spinner.velocity = PLAYER_SPEED;
         break;
       case ' ':
-        if (!gameOver) spinner.shoot();
+        if (!window.gameOver) spinner.shoot();
         break;
       case 'r':
       case 'R':
-        if (!gameOver) spinner.reload();
+        if (!window.gameOver) spinner.reload();
         break;
     }
   }
@@ -968,13 +980,13 @@ function gameLoop() {
     if (screenShake < 0.5) screenShake = 0;
   }
 
-  if (!gameStarted) {
+  if (!window.gameStarted) {
     drawTitleScreen();
     // Start playing title music if it's not already playing
     if (titleMusic.paused) {
       titleMusic.play().catch((e) => console.log('Audio play failed:', e));
     }
-  } else if (!gameOver && !transitioning) {
+  } else if (!window.gameOver && !transitioning) {
     // Draw battle background
     if (battleBackground.complete) {
       ctx.drawImage(battleBackground, 0, 0, canvas.width, canvas.height);
@@ -1065,7 +1077,7 @@ function gameLoop() {
     );
   }
 
-  if (gameOver) {
+  if (window.gameOver) {
     // Draw the last frame of battle background under the game over overlay
     if (battleBackground.complete) {
       ctx.drawImage(battleBackground, 0, 0, canvas.width, canvas.height);
@@ -1089,7 +1101,7 @@ function gameLoop() {
     );
 
     // Switch back to title music if game is over and not started
-    if (!gameStarted && titleMusic.paused) {
+    if (!window.gameStarted && titleMusic.paused) {
       titleMusic.play().catch((e) => console.log('Audio play failed:', e));
     }
   }
