@@ -4,6 +4,7 @@ import {
   RELOAD_TIME,
   SPIN_SPEED,
   SPIKE_SPEED,
+  MAX_HEALTH,
 } from '../core/constants.js';
 
 export class Spinner extends Character {
@@ -17,9 +18,26 @@ export class Spinner extends Character {
     this.lastUpdate = performance.now();
     this.lastShootTime = 0;
     this.shootCooldown = 250; // 250ms cooldown between shots
+    this.maxHealth = MAX_HEALTH;
+    this.invulnerable = false;
+    this.invulnerabilityDuration = 1000; // 1 second of invulnerability after taking damage
+    this.invulnerabilityTimer = 0;
+  }
+
+  takeDamage(amount) {
+    if (this.invulnerable) return;
+    super.takeDamage(amount);
+    this.invulnerable = true;
+    this.invulnerabilityTimer = 0;
   }
 
   draw() {
+    // Add flashing effect when invulnerable
+    if (this.invulnerable) {
+      this.ctx.globalAlpha =
+        0.5 + Math.sin(this.invulnerabilityTimer / 50) * 0.3;
+    }
+
     super.draw();
 
     this.ctx.save();
@@ -119,6 +137,11 @@ export class Spinner extends Character {
 
       this.ctx.restore();
     });
+
+    // Reset alpha
+    if (this.invulnerable) {
+      this.ctx.globalAlpha = 1;
+    }
   }
 
   shoot() {
@@ -146,6 +169,14 @@ export class Spinner extends Character {
 
   update(deltaTime) {
     const dt = deltaTime / 1000; // Convert to seconds
+
+    // Update invulnerability
+    if (this.invulnerable) {
+      this.invulnerabilityTimer += deltaTime;
+      if (this.invulnerabilityTimer >= this.invulnerabilityDuration) {
+        this.invulnerable = false;
+      }
+    }
 
     this.move(dt);
     // Spin animation

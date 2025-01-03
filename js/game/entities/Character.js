@@ -1,5 +1,7 @@
 import { MAX_HEALTH } from '../core/constants.js';
 
+const VERTICAL_PADDING = 100; // Padding from top and bottom edges
+
 export class Character {
   constructor(x, y, width, height, color, ctx) {
     this.x = x;
@@ -27,13 +29,18 @@ export class Character {
 
   move(deltaTime) {
     this.y += this.velocity * deltaTime;
-    if (this.y < 0) this.y = 0;
-    if (this.y > this.ctx.canvas.height - this.height)
-      this.y = this.ctx.canvas.height - this.height;
+    // Add padding to vertical movement
+    if (this.y < VERTICAL_PADDING) this.y = VERTICAL_PADDING;
+    if (this.y > this.ctx.canvas.height - VERTICAL_PADDING - this.height)
+      this.y = this.ctx.canvas.height - VERTICAL_PADDING - this.height;
   }
 
   takeDamage(amount) {
+    const oldHealth = this.health;
     this.health -= amount;
     if (this.health < 0) this.health = 0;
+    console.log(
+      `Health reduced from ${oldHealth} to ${this.health} (damage: ${amount})`,
+    );
   }
 }

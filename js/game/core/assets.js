@@ -3,6 +3,8 @@ export const titleMusic = new Audio('assets/audio/title.mp3');
 titleMusic.loop = true;
 export const backgroundMusic = new Audio('assets/audio/background.mp3');
 backgroundMusic.loop = true;
+export const bossMusic = new Audio('assets/audio/boss.mp3');
+bossMusic.loop = true;
 
 // Load background images
 export const titleBackground = new Image();

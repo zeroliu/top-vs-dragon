@@ -3,15 +3,19 @@ import {
   FIRE_DAMAGE,
   SPIKE_DAMAGE,
   PLAYER_SPEED,
+  MAX_HEALTH,
+  HEALTH_INCREASE_PER_LEVEL,
 } from './constants.js';
 import {
   titleMusic,
   backgroundMusic,
+  bossMusic,
   titleBackground,
   battleBackground,
 } from './assets.js';
 import { Spinner } from '../entities/Spinner.js';
 import { Dragon } from '../entities/Dragon.js';
+import { FireMinion, MOVEMENT_STATE } from '../entities/FireMinion.js';
 
 export class Game {
   constructor(canvas) {
@@ -23,14 +27,15 @@ export class Game {
     this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
     this.spinner = null;
     this.dragons = [];
+    this.minions = [];
     this.lastTime = performance.now();
     this.screenShake = {
       intensity: 0,
       duration: 0,
-      maxDuration: 200, // 200ms shake duration
-      maxIntensity: 15, // maximum pixels to shake
+      maxDuration: 200,
+      maxIntensity: 15,
     };
-    this.blinkTime = 0; // Add blink timer
+    this.blinkTime = 0;
     this.setupEventListeners();
   }
 
@@ -85,7 +90,28 @@ export class Game {
   startGame() {
     this.state = GAME_STATE.PLAYING;
     this.spinner = new Spinner(this.ctx);
-    this.dragons = [new Dragon(this.level, 0, this.ctx)];
+    this.dragons = [];
+    this.minions = [];
+
+    // First two levels have minions
+    if (this.level <= 2) {
+      const minionCount = this.level === 1 ? 2 : 3;
+      const dragonHealth = MAX_HEALTH + (3 - 1) * HEALTH_INCREASE_PER_LEVEL; // Level 3 dragon's health
+      for (let i = 0; i < minionCount; i++) {
+        this.minions.push(
+          new FireMinion(
+            this.canvas.width - 100, // All minions start at the same x position
+            dragonHealth,
+            this.ctx,
+            i, // Pass the index as vertical offset
+          ),
+        );
+      }
+    } else {
+      // Level 3 has dragon
+      this.dragons = [new Dragon(this.level, 0, this.ctx)];
+    }
+
     titleMusic.pause();
     backgroundMusic.currentTime = 0;
     backgroundMusic.play();
@@ -97,7 +123,9 @@ export class Game {
     this.state = GAME_STATE.TITLE;
     this.spinner = null;
     this.dragons = [];
+    this.minions = [];
     backgroundMusic.pause();
+    bossMusic.pause();
     titleMusic.currentTime = 0;
     titleMusic.play();
   }
@@ -148,7 +176,6 @@ export class Game {
             this.spinner.takeDamage(FIRE_DAMAGE);
             fire.exploding = true;
             fire.explosionTime = 0;
-            // Trigger screen shake
             this.screenShake.duration = this.screenShake.maxDuration;
             this.screenShake.intensity = this.screenShake.maxIntensity;
             if (this.spinner.health <= 0) {
@@ -158,8 +185,85 @@ export class Game {
         });
       });
 
-      // Check for spike hits on dragons
+      // Check for minion collisions with left edge
+      this.minions = this.minions.filter((minion) => {
+        if (minion.x <= 0) {
+          // Instead of damaging spinner, reset minion to right side
+          minion.x = this.canvas.width - 100;
+          return true;
+        }
+
+        // Check collision with spinner
+        if (
+          minion.movementState !== MOVEMENT_STATE.EXPLODING &&
+          this.checkCollision(
+            minion.x,
+            minion.y,
+            minion.width,
+            minion.height,
+            this.spinner.x,
+            this.spinner.y,
+            this.spinner.width,
+            this.spinner.height,
+          )
+        ) {
+          // Set minion to exploding and damage spinner
+          minion.movementState = MOVEMENT_STATE.EXPLODING;
+          minion.explosionRadius = 0;
+          console.log(
+            'Minion hit spinner, current spinner health:',
+            this.spinner.health,
+            'maxHealth:',
+            this.spinner.maxHealth,
+          );
+          const damage = 50; // Fixed value for testing (half of MAX_HEALTH)
+          this.spinner.takeDamage(damage);
+          console.log(
+            'After damage, spinner health:',
+            this.spinner.health,
+            'damage dealt:',
+            damage,
+          );
+          this.screenShake.duration = this.screenShake.maxDuration;
+          this.screenShake.intensity = this.screenShake.maxIntensity;
+
+          // Check if spinner died
+          if (this.spinner.health <= 0) {
+            console.log('Spinner health reached 0, calling gameOver()');
+            this.gameOver();
+            return false; // Remove the minion from the array
+          }
+        }
+
+        // If minion is exploding, check if it's done
+        if (minion.movementState === MOVEMENT_STATE.EXPLODING) {
+          const keepMinion =
+            minion.explosionRadius <= minion.maxExplosionRadius;
+
+          // If this was the last minion and it's done exploding
+          if (!keepMinion && this.minions.length === 1 && this.level <= 2) {
+            console.log(
+              'Last minion finished exploding, checking level completion',
+            );
+            if (this.spinner.health > 0) {
+              this.levelComplete();
+            } else {
+              this.gameOver();
+            }
+          }
+
+          return keepMinion;
+        }
+
+        return true;
+      });
+
+      // Update all remaining minions
+      this.minions.forEach((minion) => minion.update(deltaTime));
+
+      // Check for spike hits on dragons and minions
       this.spinner.spikes.forEach((spike, spikeIndex) => {
+        // Check dragons
         this.dragons.forEach((dragon) => {
           if (
             this.checkCollision(
@@ -184,6 +288,38 @@ export class Game {
             }
           }
         });
+
+        // Check minions
+        this.minions.forEach((minion) => {
+          if (
+            this.checkCollision(
+              spike.x,
+              spike.y - 3,
+              20,
+              6,
+              minion.x,
+              minion.y,
+              minion.width,
+              minion.height,
+            )
+          ) {
+            minion.takeDamage(SPIKE_DAMAGE);
+            this.spinner.spikes.splice(spikeIndex, 1);
+            if (minion.health <= 0) {
+              this.score += 50;
+              this.minions = this.minions.filter((m) => m !== minion);
+
+              // Check if this was the last minion
+              if (this.minions.length === 0 && this.level <= 2) {
+                if (this.spinner.health <= 0) {
+                  this.gameOver();
+                } else {
+                  this.levelComplete();
+                }
+              }
+            }
+          }
+        });
       });
     }
 
@@ -196,6 +332,7 @@ export class Game {
   }
 
   gameOver() {
+    console.log('gameOver() called, changing state to GAME_OVER');
     this.state = GAME_STATE.GAME_OVER;
     // Reset screen shake when game is over
     this.screenShake.duration = 0;
@@ -205,17 +342,36 @@ export class Game {
       localStorage.setItem('highScore', this.highScore);
     }
     backgroundMusic.pause();
+    bossMusic.pause();
   }
 
   levelComplete() {
     this.state = GAME_STATE.LEVEL_COMPLETE;
     setTimeout(() => {
       this.level++;
+      const currentHealth = this.spinner.health; // Store current health
       this.spinner = new Spinner(this.ctx);
-      this.dragons = [
-        new Dragon(this.level, 0, this.ctx),
-        new Dragon(this.level, 1, this.ctx),
-      ];
+      this.spinner.health = currentHealth; // Restore health
+      this.dragons = [];
+      this.minions = [];
+
+      // Start next level with appropriate enemies
+      if (this.level <= 2) {
+        const minionCount = this.level === 1 ? 2 : 3;
+        const dragonHealth = MAX_HEALTH + (3 - 1) * HEALTH_INCREASE_PER_LEVEL;
+        for (let i = 0; i < minionCount; i++) {
+          this.minions.push(
+            new FireMinion(this.canvas.width - 100, dragonHealth, this.ctx, i),
+          );
+        }
+      } else {
+        // Dragon level - switch to boss music
+        backgroundMusic.pause();
+        bossMusic.currentTime = 0;
+        bossMusic.play();
+        this.dragons = [new Dragon(this.level, 0, this.ctx)];
+      }
+
       this.state = GAME_STATE.PLAYING;
     }, 2000);
   }
@@ -330,11 +486,14 @@ export class Game {
       this.canvas.height,
     );
 
-    // Draw game objects
-    if (this.spinner) this.spinner.draw();
-    this.dragons.forEach((dragon) => dragon.draw());
+    // Draw game entities
+    if (this.spinner) {
+      this.spinner.draw();
+    }
 
-    // Draw HUD
+    this.dragons.forEach((dragon) => dragon.draw());
+    this.minions.forEach((minion) => minion.draw());
+
     this.drawHUD();
   }
 
